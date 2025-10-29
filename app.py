@@ -105,9 +105,6 @@ label, p, .stMarkdown, .stCaption, .stText {
 # =========================
 # Contenido original (texto/estructura)
 # =========================
-# =========================
-# Encabezado y sidebar (UI)
-# =========================
 st.markdown(
     '''
 <div class="app-header">
@@ -166,7 +163,7 @@ client = OpenAI(api_key=api_key)
 analyze_button = st.button("Analiza la imagen", type="secondary")
 
 # =========================
-# Proceso de análisis (idéntico)
+# Proceso de análisis (idéntico salvo el prompt)
 # =========================
 if canvas_result.image_data is not None and api_key and analyze_button:
 
@@ -179,7 +176,17 @@ if canvas_result.image_data is not None and api_key and analyze_button:
         # Codificar la imagen en base64
         base64_image = encode_image_to_base64("img.png")
 
-        prompt_text = (f"Describe in spanish briefly the image")
+        # ===== CAMBIO: prompt enfocado a reconocer ANIMALES a partir de un boceto =====
+        prompt_text = (
+            "Eres un asistente experto en reconocer ANIMALES a partir de bocetos simples y trazos en blanco y negro. "
+            "Analiza la imagen proporcionada (un dibujo en un lienzo) y responde en español, de forma breve y clara. "
+            "Tu objetivo es DETECTAR si el boceto representa un animal. "
+            "Si es un animal, devuelve: nombre común probable, nombre científico si es evidente, "
+            "un nivel de confianza entre 0 y 1, una descripción muy breve y 2-3 sugerencias para mejorar el dibujo "
+            "para una identificación más precisa. "
+            "Si NO parece un animal, di explícitamente: 'No parece un animal'. "
+            "Sé conciso. No inventes detalles que no se ven en el dibujo."
+        )
 
         # Create the payload for the completion request
         messages = [
@@ -218,7 +225,7 @@ if canvas_result.image_data is not None and api_key and analyze_button:
               max_tokens=500,
               )
 
-            # Mostrar resultado (misma data, mejor presentación)
+            # Mostrar resultado (misma presentación)
             st.markdown("##### Resultado")
             if response.choices[0].message.content is not None:
                 full_response += response.choices[0].message.content
@@ -226,7 +233,7 @@ if canvas_result.image_data is not None and api_key and analyze_button:
 
             message_placeholder.markdown(f"""
 <div class="card">
-  <div style="font-weight:600;margin-bottom:6px;">Descripción breve</div>
+  <div style="font-weight:600;margin-bottom:6px;">Reconocimiento de animales</div>
   <div>{full_response}</div>
 </div>
 """, unsafe_allow_html=True)
