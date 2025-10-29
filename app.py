@@ -120,7 +120,7 @@ with st.sidebar:
     st.write("Esta aplicación demuestra la capacidad de interpretar un **boceto** usando visión.")
     st.caption("Consejo: usa líneas oscuras sobre fondo blanco para mejores resultados.")
 
-st.markdown("#### ✏️ Dibuja en el lienzo y presiona **Analiza la imagen**")
+st.markdown("#### ✏️ Dibuja un animal en el lienzo y presiona **Analiza la imagen**")
 
 # =========================
 # Parámetros del dibujo (sin cambios lógicos)
