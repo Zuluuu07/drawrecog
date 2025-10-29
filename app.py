@@ -9,10 +9,11 @@ from PIL import Image, ImageOps
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import streamlit as st
 from streamlit_drawable_canvas import st_canvas
 
-Expert = " "
-profile_imgenh = " "
+Expert=" "
+profile_imgenh=" "
 
 def encode_image_to_base64(image_path):
     try:
@@ -22,130 +23,123 @@ def encode_image_to_base64(image_path):
     except FileNotFoundError:
         return "Error: La imagen no se encontró en la ruta especificada."
 
+# =========================
+# Configuración y Estilos (SOLO UI)
+# =========================
+st.set_page_config(page_title='Tablero Inteligente', layout="wide", page_icon="🧠")
 
-# -------------------- Streamlit --------------------
-st.set_page_config(page_title='Tablero Inteligente', page_icon='🧠', layout='wide')
+st.markdown("""
+<style>
+/* Tipografía global */
+html, body, [class*="css"]  {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Arial, sans-serif;
+}
 
-# ==== ESTILOS — SOLO VISUAL (asegúrate de NO quitar unsafe_allow_html=True) ====
-st.markdown(
-    """
-    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-    html, body, [class*="css"] {
-      font-family: 'Quicksand', sans-serif !important;
-      background: transparent !important;
-    }
+/* Encabezado principal */
+.app-header {
+  background: linear-gradient(135deg, #3b82f6 0%, #22c55e 100%);
+  border-radius: 16px;
+  padding: 20px 24px;
+  color: white !important;
+  box-shadow: 0 6px 24px rgba(0,0,0,.08);
+  margin-bottom: 14px;
+}
 
-    /* Títulos sin fondo ni bloques */
-    h1, h2, h3, h4 {
-      background: none !important;
-      box-shadow: none !important;
-      border: none !important;
-      margin-top: .25rem;
-      margin-bottom: .35rem;
-      font-weight: 700;
-      letter-spacing: .2px;
-    }
+/* Sidebar translúcido */
+[data-testid="stSidebar"] {
+  background: rgba(127,127,127,0.06) !important;
+  backdrop-filter: blur(8px);
+  border-right: 1px solid rgba(127,127,127,0.12);
+}
 
-    /* Colores adaptativos a modo claro/oscuro */
-    @media (prefers-color-scheme: dark) {
-      h1, h2, h3, h4 { color: #eaeaea !important; }
-    }
-    @media (prefers-color-scheme: light) {
-      h1, h2, h3, h4 { color: #1f2937 !important; }
-    }
+/* Tarjetas */
+.card {
+  border: 1px solid rgba(0,0,0,.07);
+  border-radius: 16px;
+  padding: 18px;
+  background: #ffffffaa;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 4px 18px rgba(0,0,0,.06);
+}
 
-    /* Sidebar translúcido */
-    [data-testid="stSidebar"] {
-      background: rgba(127,127,127,0.06) !important;
-      backdrop-filter: blur(8px);
-      border-right: 1px solid rgba(127,127,127,0.12);
-    }
+/* Botones */
+.stButton > button {
+  border-radius: 12px;
+  height: 42px;
+  font-weight: 600;
+}
 
-    /* Entradas redondeadas */
-    .stTextInput input,
-    .stNumberInput input,
-    .stSelectbox div[data-baseweb="select"] > div,
-    .stColorPicker input {
-      border-radius: 12px !important;
-    }
+/* Inputs redondeados */
+.stTextInput input, .stNumberInput input, .stSelectbox div[data-baseweb="select"] > div, .stColorPicker input {
+  border-radius: 12px !important;
+}
 
-    /* Slider más suave */
-    .stSlider > div [role="slider"] {
-      height: 14px !important;
-      border-radius: 999px !important;
-    }
-    .stSlider > div [data-baseweb="slider"] > div {
-      border-radius: 999px !important;
-    }
+/* Slider suave */
+.stSlider > div [role="slider"] {
+  height: 14px !important;
+  border-radius: 999px !important;
+}
 
-    /* Botones con gradiente */
-    .stButton > button {
-      background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%) !important;
-      color: #fff !important;
-      border: none !important;
-      border-radius: 12px !important;
-      font-weight: 700 !important;
-      padding: .6rem 1rem !important;
-      box-shadow: 0 8px 22px rgba(0,0,0,.25);
-      transition: all .2s ease-in-out;
-    }
-    .stButton > button:hover {
-      filter: brightness(1.05);
-      transform: translateY(-1px);
-    }
+/* Borde para el lienzo */
+.canvas-wrap {
+  border: 1px dashed rgba(0,0,0,.2);
+  border-radius: 14px;
+  padding: 8px;
+}
 
-    /* Lienzo con esquinas redondeadas y sombra */
-    canvas {
-      border-radius: 18px !important;
-      border: 1px solid rgba(127,127,127,0.18) !important;
-      box-shadow: 0 10px 28px rgba(0,0,0,.22) !important;
-    }
+/* Texto secundario heredado */
+label, p, .stMarkdown, .stCaption, .stText {
+  color: inherit !important;
+}
 
-    /* Texto secundario */
-    label, p, .stMarkdown, .stCaption, .stText { color: inherit !important; }
+/* Soporte tema oscuro/claro */
+@media (prefers-color-scheme: dark) {
+  h1, h2, h3, h4 { color: #eaeaea !important; }
+}
+@media (prefers-color-scheme: light) {
+  h1, h2, h3, h4 { color: #1f2937 !important; }
+}
+</style>
+""", unsafe_allow_html=True)
 
-    /* Divisores suaves */
-    hr { border-top: 1px solid rgba(127,127,127,0.18) !important; }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-# ==== FIN DE ESTILOS ====
-
-
+# =========================
+# Contenido original (texto/estructura)
+# =========================
 st.title('Tablero Inteligente')
 with st.sidebar:
     st.subheader("Acerca de:")
     st.subheader("En esta aplicación veremos la capacidad que ahora tiene una máquina de interpretar un boceto")
 st.subheader("Dibuja el boceto en el panel  y presiona el botón para analizarla")
 
-# Add canvas component
-# bg_image = st.sidebar.file_uploader("Cargar Imagen:", type=["png", "jpg"])
-# Specify canvas parameters in application
+# =========================
+# Parámetros del dibujo (sin cambios lógicos)
+# =========================
 drawing_mode = "freedraw"
 stroke_width = st.sidebar.slider('Selecciona el ancho de línea', 1, 30, 5)
-# stroke_color = '#FFFFFF'  # Set background color to white
-# bg_color = '#000000'
 stroke_color = "#000000"
 bg_color = '#FFFFFF'
-# realtime_update = st.sidebar.checkbox("Update in realtime", True)
 
-# Create a canvas component
+# =========================
+# Lienzo (misma API)
+# =========================
+st.markdown("#### Lienzo")
+st.markdown('<div class="canvas-wrap">', unsafe_allow_html=True)
 canvas_result = st_canvas(
     fill_color="rgba(255, 165, 0, 0.3)",  # Fixed fill color with some opacity
     stroke_width=stroke_width,
     stroke_color=stroke_color,
     background_color=bg_color,
-    height=300,
-    width=400,
-    # background_image= None # Image.open(bg_image) if bg_image else None,
+    height=340,
+    width=520,
     drawing_mode=drawing_mode,
     key="canvas",
 )
+st.markdown('</div>', unsafe_allow_html=True)
 
-ke = st.text_input('Ingresa tu Clave')
-# os.environ['OPENAI_API_KEY'] = st.secrets['OPENAI_API_KEY']
+# =========================
+# API Key (misma lógica)
+# =========================
+ke = st.text_input('Ingresa tu Clave', type="password", placeholder="sk-...")
 os.environ['OPENAI_API_KEY'] = ke
 
 # Retrieve the OpenAI API Key from secrets
@@ -154,15 +148,18 @@ api_key = os.environ['OPENAI_API_KEY']
 # Initialize the OpenAI client with the API key
 client = OpenAI(api_key=api_key)
 
+# Botón (misma lógica)
 analyze_button = st.button("Analiza la imagen", type="secondary")
 
-# Check if an image has been uploaded, if the API key is available, and if the button has been pressed
+# =========================
+# Proceso de análisis (idéntico)
+# =========================
 if canvas_result.image_data is not None and api_key and analyze_button:
 
     with st.spinner("Analizando ..."):
         # Encode the image
         input_numpy_array = np.array(canvas_result.image_data)
-        input_image = Image.fromarray(input_numpy_array.astype('uint8'), 'RGBA')
+        input_image = Image.fromarray(input_numpy_array.astype('uint8'),'RGBA')
         input_image.save('img.png')
 
         # Codificar la imagen en base64
@@ -178,48 +175,61 @@ if canvas_result.image_data is not None and api_key and analyze_button:
                     {"type": "text", "text": prompt_text},
                     {
                         "type": "image_url",
-                        "image_url": f"data:image/png;base64,{base64_image}",
+                        "image_url":f"data:image/png;base64,{base64_image}",
                     },
                 ],
             }
         ]
 
-        # Make the request to the OpenAI API
+        # Make the request to the OpenAI API (misma llamada)
         try:
             full_response = ""
             message_placeholder = st.empty()
             response = openai.chat.completions.create(
-                model="gpt-4o-mini",  # o1-preview ,gpt-4o-mini
-                messages=[
-                    {
-                        "role": "user",
-                        "content": [
-                            {"type": "text", "text": prompt_text},
-                            {
-                                "type": "image_url",
-                                "image_url": {
-                                    "url": f"data:image/png;base64,{base64_image}",
-                                },
-                            },
-                        ],
-                    }
+              model= "gpt-4o-mini",  # o1-preview ,gpt-4o-mini
+              messages=[
+                {
+                   "role": "user",
+                   "content": [
+                     {"type": "text", "text": prompt_text},
+                     {
+                       "type": "image_url",
+                       "image_url": {
+                         "url": f"data:image/png;base64,{base64_image}",
+                       },
+                     },
+                   ],
+                  }
                 ],
-                max_tokens=500,
-            )
-            # response.choices[0].message.content
+              max_tokens=500,
+              )
+
+            # Mostrar resultado (misma data, mejor presentación)
+            st.markdown("##### Resultado")
             if response.choices[0].message.content is not None:
                 full_response += response.choices[0].message.content
-                message_placeholder.markdown(full_response + "▌")
-            # Final update to placeholder after the stream ends
-            message_placeholder.markdown(full_response)
-            if Expert == profile_imgenh:
-                st.session_state.mi_respuesta = response.choices[0].message.content  # full_response
+                message_placeholder.markdown(full_response + " ▌")
 
-            # Display the response in the app
-            # st.write(response.choices[0])
+            message_placeholder.markdown(f"""
+<div class="card">
+  <div style="font-weight:600;margin-bottom:6px;">Descripción breve</div>
+  <div>{full_response}</div>
+</div>
+""", unsafe_allow_html=True)
+
+            if Expert== profile_imgenh:
+               st.session_state.mi_respuesta= response.choices[0].message.content
+
+            # Miniatura de la última imagen (solo UI)
+            try:
+                st.markdown("###### Última imagen analizada")
+                st.image("img.png", caption="img.png", use_container_width=True)
+            except Exception:
+                pass
+
         except Exception as e:
             st.error(f"An error occurred: {e}")
 else:
-    # Warnings for user action required
+    # Warnings para acción del usuario (igual)
     if not api_key:
         st.warning("Por favor ingresa tu API key.")
