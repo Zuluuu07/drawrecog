@@ -105,11 +105,25 @@ label, p, .stMarkdown, .stCaption, .stText {
 # =========================
 # Contenido original (texto/estructura)
 # =========================
-st.title('Tablero Inteligente')
+# =========================
+# Encabezado y sidebar (UI)
+# =========================
+st.markdown(
+    '''
+<div class="app-header">
+  <h2 style="margin:0;">🧠 Tablero Inteligente</h2>
+  <div>Interpreta un boceto dibujado y obtén una breve descripción con IA.</div>
+</div>
+''',
+    unsafe_allow_html=True
+)
+
 with st.sidebar:
-    st.subheader("Acerca de:")
-    st.subheader("En esta aplicación veremos la capacidad que ahora tiene una máquina de interpretar un boceto")
-st.subheader("Dibuja el boceto en el panel  y presiona el botón para analizarla")
+    st.markdown("### Acerca de")
+    st.write("Esta aplicación demuestra la capacidad de interpretar un **boceto** usando visión.")
+    st.caption("Consejo: usa líneas oscuras sobre fondo blanco para mejores resultados.")
+
+st.markdown("#### ✏️ Dibuja en el lienzo y presiona **Analiza la imagen**")
 
 # =========================
 # Parámetros del dibujo (sin cambios lógicos)
